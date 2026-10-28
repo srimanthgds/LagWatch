@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InsulGuard 4.0 | CUI Integrity-Monitoring Platform</title>
+  <meta name="description" content="Corrosion Under Insulation (CUI) Integrity-Monitoring Platform for Refinery Piping and Vessels. Conforms to ISA-101 and API RP 581.">
+  
+  <!-- Modern Typography (Inter & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for Industrial Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="brand-section">
+        <div class="brand-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>
+            INSULGUARD <span class="version-tag">4.0 PRO</span>
+          </h1>
+          <p>CUI Integrity-Monitoring Platform • ISA-101 High Performance HMI / API RP 581</p>
+        </div>
+      </div>
+
+      <div class="header-center-info">
+        <div class="facility-badge">
+          <span class="loc-dot"></span>
+          <span>BATON ROUGE REFINERY — PROCESS BLOCK 4</span>
+        </div>
+        <div id="wsStatusBadge" class="ws-status-badge">
+          <span class="pulse-indicator"></span>
+          <span id="wsStatusText">CONNECTING STREAM...</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- RBAC Persona Switcher -->
+        <div class="role-switcher-container">
+          <label for="personaSelect">Persona:</label>
+          <select id="personaSelect" class="role-select">
+            <option value="admin">Integrity Director (Admin)</option>
+            <option value="engineer" selected>Chief CUI Engineer</option>
+            <option value="viewer">Board Operator (Viewer)</option>
+          </select>
+        </div>
+
+        <!-- Alarms Button -->
+        <button id="headerAlarmBtn" class="btn-icon" title="View Active Alarms">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span id="headerAlarmCount" class="badge-counter">0</span>
+        </button>
+
+        <!-- Scenario Sandbox Trigger -->
+        <button id="openSandboxBtn" class="btn-scenario-trigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>⚡ Scenario Sandbox</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sticky KPI Ticker Strip -->
+    <section class="kpi-ticker-strip">
+      <div class="kpi-card cyan">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Piping Segments</span>
+          <div class="kpi-value-row">
+            <span id="kpiTotalSegments" class="kpi-value">300</span>
+            <span class="kpi-subtext">across 6 units</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card cyan">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Wireless Nodes</span>
+          <div class="kpi-value-row">
+            <span id="kpiTotalNodes" class="kpi-value">2,400</span>
+            <span class="kpi-subtext">3/6/9 o'clock</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card amber">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Active Wet Lines</span>
+          <div class="kpi-value-row">
+            <span id="kpiWetCount" class="kpi-value">36</span>
+            <span id="kpiWetPct" class="kpi-subtext">(12.0%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card rose">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Critical / Imminent</span>
+          <div class="kpi-value-row">
+            <span id="kpiCriticalCount" class="kpi-value">0</span>
+            <span class="kpi-subtext">t_rem &lt; 2 yrs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card rose">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Active ISA Alarms</span>
+          <div class="kpi-value-row">
+            <span id="kpiActiveAlarms" class="kpi-value">0</span>
+            <span class="kpi-subtext">pending action</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-label">Avoided CUI Loss</span>
+          <div class="kpi-value-row">
+            <span id="kpiAvoidedLoss" class="kpi-value">$17.42M</span>
+            <span class="kpi-subtext">annualized capture</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Navigation Strip -->
+    <nav class="nav-tab-strip">
+      <button class="nav-tab-btn active" data-tab="tabOverview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Overview &amp; Health</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabSegments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span>Asset Explorer</span>
+        <span id="tabSegCount" class="tab-pill-badge">300</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabRiskMatrix">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <span>API RP 581 Matrix</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabAlarms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>ISA-101 Alarms</span>
+        <span id="tabAlarmBadge" class="tab-pill-badge">0</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabCalibration">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span>UT / PEC Calibration</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabWorkOrders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Work Orders</span>
+        <span id="tabWOCount" class="tab-pill-badge">0</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabFinancials">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>CUI Financials &amp; ROI</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tabOPCUA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span>OPC-UA Mirror</span>
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- ==================== TAB 1: OVERVIEW ==================== -->
+      <section id="tabOverview" class="tab-pane active">
+        <div class="grid-overview">
+          
+          <!-- Left Column: Health & Unit Distribution -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Plant Piping Health Distribution (ISA-101)
+                  </h2>
+                  <p class="panel-subtitle">Asset health state computed from remaining life, corrosion rates, and moisture saturation</p>
+                </div>
+              </div>
+
+              <div class="grid-2col" style="align-items: center;">
+                <div style="max-height: 230px; display: flex; justify-content: center;">
+                  <canvas id="healthDonutChart"></canvas>
+                </div>
+                <div id="healthLegendContainer" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                  <!-- Filled via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Operating Unit Breakdown -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Operating Unit CUI Risk Profile</h2>
+                <span class="panel-subtitle">6 Process Blocks Monitored</span>
+              </div>
+              <div id="unitCardsGrid" class="grid-3col">
+                <!-- Unit summary cards populated by JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Real-time Live Telemetry Feed -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <div class="glass-panel" style="display: flex; flex-direction: column; height: 100%;">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">
+                    <span class="pulse-indicator"></span>
+                    Live Wireless Node Telemetry
+                  </h2>
+                  <p class="panel-subtitle">Streaming 3-second field pulses via WebSocket</p>
+                </div>
+                <span id="telemetryPulseCount" class="badge badge-healthy font-mono">0 msgs</span>
+              </div>
+
+              <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Node ID</th>
+                      <th>Pos</th>
+                      <th>Moist %</th>
+                      <th>Temp</th>
+                      <th>Battery</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="telemetryStreamBody">
+                    <tr>
+                      <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        Waiting for real-time field pulse...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: ASSET EXPLORER ==================== -->
+      <section id="tabSegments" class="tab-pane">
+        <div class="glass-panel">
+          
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Refinery Piping Segments Registry</h2>
+              <p class="panel-subtitle">300 Insulated lines under continuous CUI surveillance</p>
+            </div>
+            <span id="filteredSegCount" class="badge badge-healthy">300 lines displayed</span>
+          </div>
+
+          <div class="filter-toolbar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="segSearchInput" placeholder="Search line tag, material...">
+            </div>
+
+            <div class="filter-selects">
+              <select id="areaFilter" class="filter-select">
+                <option value="">All Operating Units</option>
+                <option value="Crude/Vacuum Overhead">Crude/Vacuum Overhead</option>
+                <option value="Fluid Catalytic Cracking (FCC)">Fluid Catalytic Cracking (FCC)</option>
+                <option value="Naphtha Hydrotreater">Naphtha Hydrotreater</option>
+                <option value="Catalytic Reformer">Catalytic Reformer</option>
+                <option value="Utilities Steam/Condensate">Utilities Steam/Condensate</option>
+                <option value="Sulfur Recovery Unit (SRU)">Sulfur Recovery Unit (SRU)</option>
+              </select>
+
+              <select id="healthFilter" class="filter-select">
+                <option value="">All Health States</option>
+                <option value="Healthy">Healthy</option>
+                <option value="Watch">Watch</option>
+                <option value="Priority">Priority</option>
+                <option value="Critical">Critical</option>
+                <option value="Imminent">Imminent</option>
+              </select>
+
+              <select id="riskFilter" class="filter-select">
+                <option value="">All Risk Tiers</option>
+                <option value="High">High Risk</option>
+                <option value="Medium-High">Medium-High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low Risk</option>
+              </select>
+
+              <button id="resetSegFiltersBtn" class="btn btn-secondary btn-sm">Reset</button>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Line Tag</th>
+                  <th>Process Unit</th>
+                  <th>Material</th>
+                  <th>Service</th>
+                  <th>Wall Loss</th>
+                  <th>Current / Nom</th>
+                  <th>Rem. Life</th>
+                  <th>Eff. CR</th>
+                  <th>Wet %</th>
+                  <th>Health</th>
+                  <th>Alarm</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="segmentsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: API RP 581 RISK MATRIX ==================== -->
+      <section id="tabRiskMatrix" class="tab-pane">
+        <div class="grid-overview">
+          
+          <!-- 5x5 Matrix Card -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">API RP 581 5×5 Risk Matrix</h2>
+                <p class="panel-subtitle">Probability of Failure (POF 1–5) vs Consequence Category (COF A–E). Click a cell to filter.</p>
+              </div>
+              <div id="matrixActiveFilterBadge" style="display: none;" class="badge badge-priority">
+                Filtering by Cell: <span id="activeCellLabel" style="margin-left: 4px;"></span>
+                <button id="clearMatrixFilterBtn" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 6px;">✕</button>
+              </div>
+            </div>
+
+            <div class="matrix-container">
+              <div class="matrix-grid">
+                <div class="matrix-y-label">PROBABILITY OF FAILURE (POF 1-5)</div>
+
+                <!-- Row 5 (POF 5) -->
+                <div class="matrix-cell cell-med" data-cof="A" data-pof="5"><span class="cell-count" id="cell-A5">0</span><span class="cell-coord">A5</span></div>
+                <div class="matrix-cell cell-medhigh" data-cof="B" data-pof="5"><span class="cell-count" id="cell-B5">0</span><span class="cell-coord">B5</span></div>
+                <div class="matrix-cell cell-high" data-cof="C" data-pof="5"><span class="cell-count" id="cell-C5">0</span><span class="cell-coord">C5</span></div>
+                <div class="matrix-cell cell-high" data-cof="D" data-pof="5"><span class="cell-count" id="cell-D5">0</span><span class="cell-coord">D5</span></div>
+                <div class="matrix-cell cell-high" data-cof="E" data-pof="5"><span class="cell-count" id="cell-E5">0</span><span class="cell-coord">E5</span></div>
+
+                <!-- Row 4 (POF 4) -->
+                <div class="matrix-cell cell-low" data-cof="A" data-pof="4"><span class="cell-count" id="cell-A4">0</span><span class="cell-coord">A4</span></div>
+                <div class="matrix-cell cell-med" data-cof="B" data-pof="4"><span class="cell-count" id="cell-B4">0</span><span class="cell-coord">B4</span></div>
+                <div class="matrix-cell cell-medhigh" data-cof="C" data-pof="4"><span class="cell-count" id="cell-C4">0</span><span class="cell-coord">C4</span></div>
+                <div class="matrix-cell cell-high" data-cof="D" data-pof="4"><span class="cell-count" id="cell-D4">0</span><span class="cell-coord">D4</span></div>
+                <div class="matrix-cell cell-high" data-cof="E" data-pof="4"><span class="cell-count" id="cell-E4">0</span><span class="cell-coord">E4</span></div>
+
+                <!-- Row 3 (POF 3) -->
+                <div class="matrix-cell cell-low" data-cof="A" data-pof="3"><span class="cell-count" id="cell-A3">0</span><span class="cell-coord">A3</span></div>
+                <div class="matrix-cell cell-low" data-cof="B" data-pof="3"><span class="cell-count" id="cell-B3">0</span><span class="cell-coord">B3</span></div>
+                <div class="matrix-cell cell-med" data-cof="C" data-pof="3"><span class="cell-count" id="cell-C3">0</span><span class="cell-coord">C3</span></div>
+                <div class="matrix-cell cell-medhigh" data-cof="D" data-pof="3"><span class="cell-count" id="cell-D3">0</span><span class="cell-coord">D3</span></div>
+                <div class="matrix-cell cell-high" data-cof="E" data-pof="3"><span class="cell-count" id="cell-E3">0</span><span class="cell-coord">E3</span></div>
+
+                <!-- Row 2 (POF 2) -->
+                <div class="matrix-cell cell-low" data-cof="A" data-pof="2"><span class="cell-count" id="cell-A2">0</span><span class="cell-coord">A2</span></div>
+                <div class="matrix-cell cell-low" data-cof="B" data-pof="2"><span class="cell-count" id="cell-B2">0</span><span class="cell-coord">B2</span></div>
+                <div class="matrix-cell cell-low" data-cof="C" data-pof="2"><span class="cell-count" id="cell-C2">0</span><span class="cell-coord">C2</span></div>
+                <div class="matrix-cell cell-med" data-cof="D" data-pof="2"><span class="cell-count" id="cell-D2">0</span><span class="cell-coord">D2</span></div>
+                <div class="matrix-cell cell-medhigh" data-cof="E" data-pof="2"><span class="cell-count" id="cell-E2">0</span><span class="cell-coord">E2</span></div>
+
+                <!-- Row 1 (POF 1) -->
+                <div class="matrix-cell cell-low" data-cof="A" data-pof="1"><span class="cell-count" id="cell-A1">0</span><span class="cell-coord">A1</span></div>
+                <div class="matrix-cell cell-low" data-cof="B" data-pof="1"><span class="cell-count" id="cell-B1">0</span><span class="cell-coord">B1</span></div>
+                <div class="matrix-cell cell-low" data-cof="C" data-pof="1"><span class="cell-count" id="cell-C1">0</span><span class="cell-coord">C1</span></div>
+                <div class="matrix-cell cell-low" data-cof="D" data-pof="1"><span class="cell-count" id="cell-D1">0</span><span class="cell-coord">D1</span></div>
+                <div class="matrix-cell cell-med" data-cof="E" data-pof="1"><span class="cell-count" id="cell-E1">0</span><span class="cell-coord">E1</span></div>
+
+                <!-- X Axis Labels -->
+                <div class="matrix-x-labels">
+                  <div>Cat A</div>
+                  <div>Cat B</div>
+                  <div>Cat C</div>
+                  <div>Cat D</div>
+                  <div>Cat E</div>
+                </div>
+              </div>
+              <div style="text-align: center; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 4px;">
+                CONSEQUENCE OF FAILURE (COF CATEGORY A–E)
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk Summary Stats -->
+          <div class="glass-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="panel-header">
+              <h2 class="panel-title">Asset Risk Classification</h2>
+              <span class="panel-subtitle">API RP 581 Tiers</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+              <div class="kpi-card rose">
+                <div class="kpi-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="kpi-body">
+                  <span class="kpi-label">High Risk Tier</span>
+                  <div class="kpi-value-row">
+                    <span id="riskCountHigh" class="kpi-value">0</span>
+                    <span class="kpi-subtext">priority turnaround</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card amber">
+                <div class="kpi-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="kpi-body">
+                  <span class="kpi-label">Medium-High Tier</span>
+                  <div class="kpi-value-row">
+                    <span id="riskCountMedHigh" class="kpi-value">0</span>
+                    <span class="kpi-subtext">scheduled NDT/PEC</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card amber">
+                <div class="kpi-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+                <div class="kpi-body">
+                  <span class="kpi-label">Medium Tier</span>
+                  <div class="kpi-value-row">
+                    <span id="riskCountMed" class="kpi-value">0</span>
+                    <span class="kpi-subtext">standard interval</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card emerald">
+                <div class="kpi-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="kpi-body">
+                  <span class="kpi-label">Low Risk Tier</span>
+                  <div class="kpi-value-row">
+                    <span id="riskCountLow" class="kpi-value">0</span>
+                    <span class="kpi-subtext">baseline monitoring</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Prioritized Inspection Planner Table -->
+        <div class="glass-panel" style="margin-top: 1.25rem;">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Prioritized Inspection Planner (API RP 581 Ranked)</h2>
+              <p class="panel-subtitle">Sorted by Failure Probability and minimum remaining wall life</p>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Line Tag</th>
+                  <th>Operating Unit</th>
+                  <th>Risk Tier</th>
+                  <th>POF</th>
+                  <th>COF</th>
+                  <th>Remaining Life</th>
+                  <th>Next Inspection Due</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inspectionPlannerBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: ISA-101 ALARMS ==================== -->
+      <section id="tabAlarms" class="tab-pane">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">ISA-101 High Performance Alarm Console</h2>
+              <p class="panel-subtitle">State 1 (Advisory) ➔ State 2 (Verify) ➔ State 3 (Plan Repair) ➔ State 4 (Escalate)</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary btn-sm alarm-status-filter active" data-status="">All</button>
+              <button class="btn btn-secondary btn-sm alarm-status-filter" data-status="ACTIVE">Active</button>
+              <button class="btn btn-secondary btn-sm alarm-status-filter" data-status="ACKNOWLEDGED">Acknowledged</button>
+              <button class="btn btn-secondary btn-sm alarm-status-filter" data-status="CLEARED">Cleared</button>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alarm ID</th>
+                  <th>State</th>
+                  <th>Severity</th>
+                  <th>Line Tag</th>
+                  <th>Process Unit</th>
+                  <th>Trigger Reason</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th>Operator Ack</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="alarmsTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: UT / PEC CALIBRATION ==================== -->
+      <section id="tabCalibration" class="tab-pane">
+        <div class="grid-overview">
+          
+          <!-- Parity Scatter Plot -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Robotic PEC vs Ultrasonic (UT) Verification Parity</h2>
+                <p class="panel-subtitle">Direct comparison between non-intrusive PEC screening and ground truth UT excavation digs</p>
+              </div>
+              <button id="openRecordDigBtn" class="btn btn-primary btn-sm">
+                + Record Verification Dig
+              </button>
+            </div>
+
+            <div style="height: 380px; position: relative;">
+              <canvas id="calibrationScatterChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Calibration Stats & Active Model -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Model Calibration Metrics</h2>
+              <span id="activeModelTag" class="badge badge-healthy font-mono">v1.0.0-Baseline</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <div class="kpi-card cyan">
+                <div class="kpi-body">
+                  <span class="kpi-label">Coefficient of Determination (R²)</span>
+                  <div class="kpi-value-row">
+                    <span id="calibR2" class="kpi-value">0.96</span>
+                    <span class="kpi-subtext">high fidelity fit</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card amber">
+                <div class="kpi-body">
+                  <span class="kpi-label">Mean Systematic Bias</span>
+                  <div class="kpi-value-row">
+                    <span id="calibBias" class="kpi-value">0.05 mm</span>
+                    <span class="kpi-subtext">PEC over/under prediction</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card cyan">
+                <div class="kpi-body">
+                  <span class="kpi-label">Empirical Scatter (1σ)</span>
+                  <div class="kpi-value-row">
+                    <span id="calibScatter" class="kpi-value">0.22 mm</span>
+                    <span class="kpi-subtext">measurement variance</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card emerald">
+                <div class="kpi-body">
+                  <span class="kpi-label">Calibration Verification Points</span>
+                  <div class="kpi-value-row">
+                    <span id="calibPointsCount" class="kpi-value">48</span>
+                    <span class="kpi-subtext">dig pairs calibrated</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Verification Digs History Table -->
+        <div class="glass-panel" style="margin-top: 1.25rem;">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Physical Verification Digs &amp; NDT Ground-Truth Log</h2>
+              <p class="panel-subtitle">Field correlation between Pulsed Eddy Current (PEC) screening and Ultrasonic (UT) pipe wall measurement</p>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Dig ID</th>
+                  <th>Line Tag</th>
+                  <th>Chainage</th>
+                  <th>Dig Date</th>
+                  <th>Insulation Condition</th>
+                  <th>Corrosion Morphology</th>
+                  <th>PEC Pred (mm)</th>
+                  <th>UT Meas (mm)</th>
+                  <th>Delta (mm)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="digsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 6: WORK ORDERS ==================== -->
+      <section id="tabWorkOrders" class="tab-pane">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">CUI Mitigation Work Orders &amp; Dispatch</h2>
+              <p class="panel-subtitle">Automated work order creation from State 3/4 Alarms and manual maintenance dispatch</p>
+            </div>
+            <button id="openCreateWOBtn" class="btn btn-primary btn-sm">+ Dispatch Work Order</button>
+          </div>
+
+          <div class="filter-toolbar">
+            <div class="filter-selects">
+              <select id="woStatusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="DRAFT">Draft</option>
+                <option value="APPROVED">Approved</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+
+              <select id="woPriorityFilter" class="filter-select">
+                <option value="">All Priorities</option>
+                <option value="P1">P1 - Immediate (Turnaround)</option>
+                <option value="P2">P2 - High Priority</option>
+                <option value="P3">P3 - Medium</option>
+                <option value="P4">P4 - Low</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Priority</th>
+                  <th>Line Tag</th>
+                  <th>Process Unit</th>
+                  <th>Order Title</th>
+                  <th>Assigned Crew</th>
+                  <th>Est. Cost</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="workOrdersTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 7: FINANCIALS ==================== -->
+      <section id="tabFinancials" class="tab-pane">
+        <div class="grid-2col">
+          
+          <!-- Parameters Input Form -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">CUI Loss Ledger &amp; Financial ROI Engine</h2>
+                <p class="panel-subtitle">Inputs based on refinery turnaround history and avoided shutdown costs</p>
+              </div>
+              <button id="recalcFinancialsBtn" class="btn btn-primary btn-sm">Calculate ROI</button>
+            </div>
+
+            <form id="financialsForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="finBaseline">Baseline Annual CUI Loss ($)</label>
+                <input type="number" id="finBaseline" class="form-input" value="26800000" step="100000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="finCapex">Turnaround / Sensor CapEx ($)</label>
+                <input type="number" id="finCapex" class="form-input" value="12513000" step="50000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="finOpex">Annual Surveillance OpEx ($/yr)</label>
+                <input type="number" id="finOpex" class="form-input" value="1850000" step="50000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="finDiscount">Discount Rate (WACC)</label>
+                <input type="number" id="finDiscount" class="form-input" value="0.08" step="0.01">
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / 3;">
+                <label class="form-label" for="finCapture">Projected CUI Loss Reduction (%)</label>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                  <input type="range" id="finCapture" style="flex: 1; accent-color: var(--color-cyan);" min="20" max="90" value="65">
+                  <span id="finCaptureVal" class="font-mono text-cyan" style="font-weight: 700; width: 45px;">65%</span>
+                </div>
+              </div>
+            </form>
+
+            <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="kpi-card emerald">
+                <div class="kpi-body">
+                  <span class="kpi-label">Payback Period</span>
+                  <div class="kpi-value-row">
+                    <span id="finPayback" class="kpi-value">0.8 yr</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card emerald">
+                <div class="kpi-body">
+                  <span class="kpi-label">5-Year Net Present Value (NPV)</span>
+                  <div class="kpi-value-row">
+                    <span id="finNPV" class="kpi-value">$49.5M</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sensitivity Scenarios Comparison -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Sensitivity &amp; Stress Test Scenarios</h2>
+              <span class="panel-subtitle">5-Year Multi-Horizon Evaluation</span>
+            </div>
+
+            <div id="sensitivityCardsList" style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== TAB 8: OPC-UA MIRROR ==================== -->
+      <section id="tabOPCUA" class="tab-pane">
+        <div class="grid-2col">
+          
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">OPC UA Address Space Mirror</h2>
+                <p class="panel-subtitle">Industrial automation tag hierarchy (ns=2;s=Plant.CUI...)</p>
+              </div>
+              <span class="badge badge-healthy font-mono">OPC-UA v1.04</span>
+            </div>
+
+            <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Display Name</th>
+                    <th>Node ID</th>
+                    <th>Value</th>
+                    <th>Units</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="opcuaNodesBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Live Tag Direct Read Tester</h2>
+              <span class="panel-subtitle">DCS / SCADA Interface</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="opcuaTagInput">Tag Browse Path:</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="opcuaTagInput" class="form-input font-mono" value="Line.12in-P-1043-A1A.RemainingLife">
+                <button id="readOpcuaTagBtn" class="btn btn-primary btn-sm">Read Tag</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <label class="form-label">OPC UA Response JSON:</label>
+              <pre id="opcuaResponseBox" class="font-mono" style="background: rgba(10, 15, 26, 0.9); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); color: var(--color-cyan); font-size: 0.78rem; overflow-x: auto; min-height: 180px;">Click "Read Tag" to query DCS mirror...</pre>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Segment Detail / Pipe Cross-Section Modal -->
+    <div id="segmentDetailModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 820px;">
+        <div class="modal-header">
+          <div>
+            <h3 id="modalLineTagTitle">Line Tag Inspector</h3>
+            <span id="modalAreaSubtitle" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+          </div>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="grid-2col" style="align-items: center; margin-bottom: 1.25rem;">
+            
+            <!-- SVG Pipe Cross-Section -->
+            <div class="pipe-cross-section-card">
+              <span style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">
+                Pipe Cross-Section &amp; Wireless Node Radial Array
+              </span>
+              <svg class="cross-section-svg" viewBox="0 0 200 200">
+                <!-- Outer Insulation Jacket -->
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="4,4"/>
+                <text x="100" y="24" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">12 o'clock</text>
+                
+                <!-- Insulation Annulus -->
+                <circle cx="100" cy="100" r="70" fill="rgba(30, 41, 59, 0.5)" stroke="#1e293b" stroke-width="2"/>
+                
+                <!-- Steel Pipe Wall -->
+                <circle cx="100" cy="100" r="50" fill="rgba(6, 182, 212, 0.1)" stroke="#06b6d4" stroke-width="6"/>
+                <!-- Internal Process Core -->
+                <circle cx="100" cy="100" r="44" fill="#0b1120"/>
+                
+                <text x="100" y="104" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600" id="svgNominalText">8" SCH 40</text>
+                
+                <!-- 3 o'clock Node -->
+                <circle id="svgNode3" class="node-circle" cx="170" cy="100" r="8" fill="#10b981"/>
+                <text x="188" y="103" text-anchor="start" fill="#94a3b8" font-size="9" font-family="monospace">3h</text>
+                
+                <!-- 6 o'clock Node (Low Point) -->
+                <circle id="svgNode6" class="node-circle" cx="100" cy="170" r="8" fill="#10b981"/>
+                <text x="100" y="192" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">6h (Drain)</text>
+                
+                <!-- 9 o'clock Node -->
+                <circle id="svgNode9" class="node-circle" cx="30" cy="100" r="8" fill="#10b981"/>
+                <text x="12" y="103" text-anchor="end" fill="#94a3b8" font-size="9" font-family="monospace">9h</text>
+              </svg>
+            </div>
+
+            <!-- Wall Integrity & Physical Metrics -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div class="kpi-card cyan" style="padding: 0.6rem 0.8rem;">
+                <div class="kpi-body">
+                  <span class="kpi-label">Remaining Wall Thickness</span>
+                  <div class="kpi-value-row">
+                    <span id="modalCurrentWall" class="kpi-value">7.8 mm</span>
+                    <span id="modalNominalWall" class="kpi-subtext">/ 8.18 mm nom</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card rose" style="padding: 0.6rem 0.8rem;">
+                <div class="kpi-body">
+                  <span class="kpi-label">Remaining Corrosion Life</span>
+                  <div class="kpi-value-row">
+                    <span id="modalRemLife" class="kpi-value">12.4 yrs</span>
+                    <span id="modalHealthState" class="badge badge-healthy" style="margin-left: 8px;">Healthy</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card amber" style="padding: 0.6rem 0.8rem;">
+                <div class="kpi-body">
+                  <span class="kpi-label">Effective CUI Corrosion Rate</span>
+                  <div class="kpi-value-row">
+                    <span id="modalEffCR" class="kpi-value">0.18 mm/yr</span>
+                    <span id="modalRollingWet" class="kpi-subtext">Wet: 15%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Nodes Detailed Telemetry Table -->
+          <div class="table-responsive">
+            <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+              Attached Wireless Moisture &amp; Temperature Nodes
+            </h4>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Node ID</th>
+                  <th>Clock Pos</th>
+                  <th>Moisture %</th>
+                  <th>Jacket Temp</th>
+                  <th>Battery</th>
+                  <th>Last Reading</th>
+                </tr>
+              </thead>
+              <tbody id="modalNodesTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn-footer">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alarm Two-Step Acknowledge Modal -->
+    <div id="alarmAckModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-watch);">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Operator Alarm Acknowledgment (ISA-101)
+          </h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p id="alarmAckSubtitle" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;"></p>
+          
+          <div class="form-group">
+            <label class="form-label" for="ackNotesInput">Operator Action &amp; Dispatch Notes (Required):</label>
+            <textarea id="ackNotesInput" class="form-textarea" placeholder="E.g. Dispatched NDT inspection team to low-point insulation elbow for UT verification."></textarea>
+          </div>
+
+          <div class="checkbox-confirm-wrap">
+            <input type="checkbox" id="ackConfirmCheck">
+            <label for="ackConfirmCheck">
+              <strong>I confirm operational verification of this CUI alarm</strong> and take integrity responsibility for field validation according to plant procedure SOP-CUI-102.
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn-footer">Cancel</button>
+          <button id="submitAlarmAckBtn" class="btn btn-primary">Acknowledge Alarm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Work Order Modal -->
+    <div id="createWOModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create CUI Maintenance Work Order</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <form id="createWOForm">
+            <div class="form-group">
+              <label class="form-label" for="woSegmentSelect">Target Piping Segment:</label>
+              <select id="woSegmentSelect" class="form-select"></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="woTitleInput">Work Order Title:</label>
+              <input type="text" id="woTitleInput" class="form-input" placeholder="E.g. Strip & Strip-Inspection Calcium Silicate Low Point">
+            </div>
+
+            <div class="grid-2col">
+              <div class="form-group">
+                <label class="form-label" for="woPrioritySelect">Priority Level:</label>
+                <select id="woPrioritySelect" class="form-select">
+                  <option value="P1">P1 - Immediate (Turnaround)</option>
+                  <option value="P2" selected>P2 - High Priority</option>
+                  <option value="P3">P3 - Medium</option>
+                  <option value="P4">P4 - Low</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="woCostInput">Estimated Cost (USD):</label>
+                <input type="number" id="woCostInput" class="form-input" value="45000" step="5000">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="woAssignedInput">Assigned Maintenance Crew:</label>
+              <input type="text" id="woAssignedInput" class="form-input" value="Insulation & Cladding Specialists Unit 4">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="woDescInput">Scope of Work:</label>
+              <textarea id="woDescInput" class="form-textarea" placeholder="Describe insulation strip, visual inspection, surface prep, UT grid and re-cladding requirements..."></textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn-footer">Cancel</button>
+          <button id="submitCreateWOBtn" class="btn btn-primary">Dispatch Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Record Verification Dig Modal -->
+    <div id="recordDigModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Record Ultrasonic (UT) Verification Dig</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Records physical excavation dig measurements and automatically triggers Bayesian model recalibration of baseline corrosion rate (CR₀) and chloride acceleration.
+          </p>
+
+          <form id="recordDigForm">
+            <div class="form-group">
+              <label class="form-label" for="digSegmentSelect">Target Piping Segment:</label>
+              <select id="digSegmentSelect" class="form-select"></select>
+            </div>
+
+            <div class="grid-2col">
+              <div class="form-group">
+                <label class="form-label" for="digChainage">Chainage Location (m):</label>
+                <input type="number" id="digChainage" class="form-input" value="12.5" step="0.5">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="digInsulation">Insulation Condition:</label>
+                <select id="digInsulation" class="form-select">
+                  <option value="Wet Degraded">Wet Degraded</option>
+                  <option value="Moist Intact">Moist Intact</option>
+                  <option value="Saturated Saturated Slurry">Saturated Saturated Slurry</option>
+                  <option value="Dry Sound">Dry Sound</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2col">
+              <div class="form-group">
+                <label class="form-label" for="digPecVal">PEC Predicted Wall (mm):</label>
+                <input type="number" id="digPecVal" class="form-input" value="7.40" step="0.05">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="digUtVal">UT Measured Actual (mm):</label>
+                <input type="number" id="digUtVal" class="form-input" value="7.32" step="0.05">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="digMorphology">Corrosion Morphology:</label>
+              <select id="digMorphology" class="form-select">
+                <option value="General Wall Loss">General Wall Loss</option>
+                <option value="Localized Pitting (CUI Sweetspot)">Localized Pitting (CUI Sweetspot)</option>
+                <option value="Under-deposit Etching">Under-deposit Etching</option>
+                <option value="Minimal Oxide Scale">Minimal Oxide Scale</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="digNotes">Inspector Field Notes:</label>
+              <textarea id="digNotes" class="form-textarea" placeholder="E.g. Visual confirmation of wet calcium silicate at 6 o'clock elbow. Multi-point UT grid validated."></textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn-footer">Cancel</button>
+          <button id="submitRecordDigBtn" class="btn btn-primary">Save &amp; Recalibrate Model</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scenario Sandbox Injection Modal -->
+    <div id="sandboxModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-cyan);">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Refinery CUI Digital Twin — Scenario Sandbox
+          </h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Trigger real-time stress events in the digital twin physics engine to observe ISA-101 alarm progression, sensor telemetry bursts, and maintenance dispatching.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            
+            <!-- Scenario 1: Rain Event -->
+            <div style="background: rgba(18, 26, 43, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div>
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: #93c5fd;">🌧️ Heavy Rain Storm Ingress</h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                  Simulates a severe weather front wetting 40 piping segments. Wireless nodes record &gt;35% moisture spikes and trigger State 1 Advisory alarms.
+                </p>
+              </div>
+              <button class="btn btn-secondary btn-sm btn-inject" data-scenario="rain_event" style="white-space: nowrap;">Inject Storm</button>
+            </div>
+
+            <!-- Scenario 2: Steam Tracer Burst -->
+            <div style="background: rgba(18, 26, 43, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div>
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: #fca5a5;">♨️ Steam Tracer Internal Burst</h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                  Simulates steam tracer tube puncture. Spikes temperature +14°C and moisture 85%, accelerating corrosion to 1.15 mm/yr. Auto-escalates to State 3/4 and creates emergency P1 Work Order!
+                </p>
+              </div>
+              <button class="btn btn-danger btn-sm btn-inject" data-scenario="tracer_leak" style="white-space: nowrap;">Inject Burst</button>
+            </div>
+
+            <!-- Scenario 3: Blocked Drain -->
+            <div style="background: rgba(18, 26, 43, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div>
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: #fde68a;">💧 Blocked Low-Point Drainage</h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                  Water accumulates exclusively at 6 o'clock elbow nodes. Triggers localized drainage saturation alarm and Verify state.
+                </p>
+              </div>
+              <button class="btn btn-secondary btn-sm btn-inject" data-scenario="blocked_drain" style="white-space: nowrap;">Inject Blockage</button>
+            </div>
+
+            <!-- Scenario 4: PEC Sweep Upload -->
+            <div style="background: rgba(18, 26, 43, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div>
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: #6ee7b7;">🤖 Robotic Crawler PEC Scan Sweep</h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">
+                  Simulates automated crawler uploading non-intrusive wall thickness survey scans, updating segment wall measurements in real-time.
+                </p>
+              </div>
+              <button class="btn btn-emerald btn-sm btn-inject" data-scenario="pec_sweep_upload" style="white-space: nowrap;">Upload Scan</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn-footer">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
